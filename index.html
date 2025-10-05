@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Calculator</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind to use Inter font and apply a dark mode style -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles for the calculator appearance */
+        body {
+            background-color: #0d1117; /* Dark background color */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .calculator {
+            min-height: 500px;
+            max-width: 420px; /* Max width for mobile focus */
+            width: 100%;
+        }
+
+        .calc-button {
+            transition: all 0.1s;
+            user-select: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Operator color scheme */
+        .btn-op {
+            background-color: #ff9500;
+            color: white;
+        }
+        .btn-op:hover {
+            background-color: #e08500;
+        }
+
+        /* Scientific function color scheme */
+        .btn-sci {
+            background-color: #3a3a3a;
+            color: #d1d5db; /* Light gray text */
+            font-size: 0.875rem; /* sm text size */
+        }
+        .btn-sci:hover {
+            background-color: #2a2a2a;
+        }
+
+        /* Number/dot/parenthesis color scheme */
+        .btn-num {
+            background-color: #505050;
+            color: white;
+        }
+        .btn-num:hover {
+            background-color: #404040;
+        }
+    </style>
+</head>
+<body>
+
+<div class="calculator p-4 shadow-2xl rounded-2xl bg-gray-900 border border-gray-700">
+    <!-- Display Area -->
+    <div class="mb-4">
+        <!-- History/Small display -->
+        <div id="history-display" class="text-gray-400 text-sm h-6 text-right overflow-hidden whitespace-nowrap">0</div>
+        <!-- Current Input/Result display -->
+        <div id="main-display" class="text-white text-5xl font-light h-16 text-right overflow-x-auto whitespace-nowrap">0</div>
+    </div>
+
+    <!-- Button Grid -->
+    <div class="grid grid-cols-5 gap-2">
+
+        <!-- Scientific Functions (Row 1) -->
+        <button class="col-span-1 p-3 rounded-xl btn-sci" onclick="handleInput('rad')">RAD</button>
+        <button class="col-span-1 p-3 rounded-xl btn-sci" onclick="handleInput('sin(')">sin</button>
+        <button class="col-span-1 p-3 rounded-xl btn-sci" onclick="handleInput('cos(')">cos</button>
+        <button class="col-span-1 p-3 rounded-xl btn-sci" onclick="handleInput('tan(')">tan</button>
+        <button class="col-span-1 p-3 rounded-xl btn-sci" onclick="handleInput('^')">xʸ</button>
+
+        <!-- Scientific Functions (Row 2) -->
+        <button class="col-span-1 p-3 rounded-xl btn-sci" onclick="handleInput('log(')">log</button>
+        <button class="col-span-1 p-3 rounded-xl btn-sci" onclick="handleInput('ln(')">ln</button>
+        <button class="col-span-1 p-3 rounded-xl btn-sci" onclick="handleInput('sqrt(')">√</button>
+        <button class="col-span-1 p-3 rounded-xl btn-sci" onclick="handleInput('pi')">π</button>
+        <button class="col-span-1 p-3 rounded-xl btn-sci" onclick="handleInput('e')">e</button>
+
+        <!-- Control/Parenthesis Row -->
+        <button class="col-span-1 p-3 rounded-xl btn-sci bg-red-700 hover:bg-red-600" onclick="clearAll()">AC</button>
+        <button class="col-span-1 p-3 rounded-xl btn-sci bg-red-700 hover:bg-red-600" onclick="deleteLast()">DEL</button>
+        <button class="col-span-1 p-3 rounded-xl btn-num" onclick="handleInput('(')">(</button>
+        <button class="col-span-1 p-3 rounded-xl btn-num" onclick="handleInput(')')">)</button>
+        <button class="col-span-1 p-3 rounded-xl btn-op" onclick="handleInput('/')">÷</button>
+
+        <!-- Number Row 7, 8, 9 -->
+        <button class="col-span-1 p-3 rounded-xl btn-num" onclick="handleInput('7')">7</button>
+        <button class="col-span-1 p-3 rounded-xl btn-num" onclick="handleInput('8')">8</button>
+        <button class="col-span-1 p-3 rounded-xl btn-num" onclick="handleInput('9')">9</button>
+        <button class="col-span-1 p-3 rounded-xl btn-num" onclick="handleInput('**2')">x²</button>
+        <button class="col-span-1 p-3 rounded-xl btn-op" onclick="handleInput('*')">×</button>
+
+        <!-- Number Row 4, 5, 6 -->
+        <button class="col-span-1 p-3 rounded-xl btn-num" onclick="handleInput('4')">4</button>
+        <button class="col-span-1 p-3 rounded-xl btn-num" onclick="handleInput('5')">5</button>
+        <button class="col-span-1 p-3 rounded-xl btn-num" onclick="handleInput('6')">6</button>
+        <button class="col-span-1 p-3 rounded-xl btn-num" onclick="handleInput('1/')">1/x</button>
+        <button class="col-span-1 p-3 rounded-xl btn-op" onclick="handleInput('-')">−</button>
+
+        <!-- Number Row 1, 2, 3 -->
+        <button class="col-span-1 p-3 rounded-xl btn-num" onclick="handleInput('1')">1</button>
+        <button class="col-span-1 p-3 rounded-xl btn-num" onclick="handleInput('2')">2</button>
+        <button class="col-span-1 p-3 rounded-xl btn-num" onclick="handleInput('3')">3</button>
+        <button class="col-span-1 p-3 rounded-xl btn-num" onclick="handleInput('%')">%</button>
+        <button class="col-span-1 p-3 rounded-xl btn-op" onclick="handleInput('+')">+</button>
+
+        <!-- Bottom Row 0, ., = -->
+        <button class="col-span-2 p-3 rounded-xl btn-num" onclick="handleInput('0')">0</button>
+        <button class="col-span-1 p-3 rounded-xl btn-num" onclick="handleInput('.')">.</button>
+        <button class="col-span-2 p-3 rounded-xl btn-op bg-green-600 hover:bg-green-500" onclick="calculate()">=</button>
+
+    </div>
+
+    <!-- Copyright Notice -->
+    <div class="mt-4 text-center text-xs text-gray-500">
+        Copyright reserved "Akporuvie"
+    </div>
+</div>
+
+<script>
+    // Global variables
+    let currentExpression = '';
+    let isResultDisplayed = false;
+    let isRadianMode = true; // true for Rad, false for Deg
+
+    const historyDisplay = document.getElementById('history-display');
+    const mainDisplay = document.getElementById('main-display');
+
+    // Helper function to update the display
+    function updateDisplay(result = currentExpression) {
+        // Show 0 if the expression is empty
+        mainDisplay.textContent = result || '0';
+        // Limit history display length
+        historyDisplay.textContent = currentExpression.length > 50 
+            ? '...' + currentExpression.substring(currentExpression.length - 50)
+            : currentExpression || '0';
+    }
+
+    // Clears all input and results
+    function clearAll() {
+        currentExpression = '';
+        isResultDisplayed = false;
+        historyDisplay.textContent = '0';
+        updateDisplay();
+    }
+
+    // Deletes the last character from the expression
+    function deleteLast() {
+        if (isResultDisplayed) {
+            // If a result is displayed, pressing DEL clears the display to '0'
+            currentExpression = '';
+            isResultDisplayed = false;
+        } else {
+            // Otherwise, delete the last character
+            currentExpression = currentExpression.slice(0, -1);
+        }
+        updateDisplay();
+    }
+
+    // Toggle between Radian and Degree mode (UI update only)
+    function toggleRadDeg() {
+        isRadianMode = !isRadianMode;
+        // Find the RAD button and update its text/style
+        const radButton = document.querySelector('[onclick="handleInput(\'rad\')"]');
+        if (radButton) {
+            radButton.textContent = isRadianMode ? 'RAD' : 'DEG';
+            // Toggle color to indicate active mode: blue for DEG
+            radButton.classList.toggle('bg-blue-600', !isRadianMode);
+            radButton.classList.toggle('bg-gray-700', isRadianMode);
+        }
+    }
+
+    // Handles button clicks and updates the expression string
+    function handleInput(input) {
+        if (isResultDisplayed) {
+            // If a result is displayed, start a new calculation unless the input is an operator
+            if ('+-*/^%'.includes(input)) {
+                // If operator, use the result as the start of the new expression
+                currentExpression = mainDisplay.textContent + input;
+            } else {
+                // Otherwise, start a fresh expression
+                currentExpression = (input === 'pi' || input === 'e' || input.endsWith('(')) ? input : '';
+                currentExpression += input;
+            }
+            isResultDisplayed = false;
+        } else {
+            if (input === 'rad') {
+                toggleRadDeg();
+                return;
+            }
+            if (input === 'pi') input = 'PI';
+            if (input === 'e') input = 'E';
+            if (input === '**2') input = '**2';
+            if (input === '1/') input = '1/('; 
+
+            currentExpression += input;
+        }
+        updateDisplay();
+    }
+
+    // Prepares the expression for safe evaluation by replacing scientific functions
+    function prepareExpression(expression) {
+        let prep = expression;
+
+        // 1. Replace constants
+        prep = prep.replace(/PI/g, Math.PI);
+        prep = prep.replace(/E/g, Math.E);
+        
+        // 2. Replace scientific functions with Math. equivalents, prefixing with 'd' if in DEG mode.
+        // If in RAD mode, use standard Math. functions.
+        // If in DEG mode, use custom 'd' functions (dsin, dcos, dtan) defined in calculate() scope.
+        const prefix = isRadianMode ? 'Math.' : 'd';
+        
+        // Trigonometric functions
+        prep = prep.replace(/sin\(/g, `${prefix}sin(`);
+        prep = prep.replace(/cos\(/g, `${prefix}cos(`);
+        prep = prep.replace(/tan\(/g, `${prefix}tan(`);
+        
+        // Logarithms and Square Root (Always Math. - no mode conversion)
+        prep = prep.replace(/log\(/g, 'Math.log10(');
+        prep = prep.replace(/ln\(/g, 'Math.log(');
+        prep = prep.replace(/sqrt\(/g, 'Math.sqrt(');
+
+        // Power operator (x^y)
+        prep = prep.replace(/\^/g, '**'); 
+        
+        return prep;
+    }
+
+    // Function to safely evaluate the expression
+    function calculate() {
+        if (!currentExpression) {
+            mainDisplay.textContent = 'Error';
+            return;
+        }
+
+        // --- Helper functions for DEGREE mode evaluation ---
+        // These are defined here so they are in the execution scope of `eval`
+        const degToRad = (deg) => deg * (Math.PI / 180);
+
+        // d-functions for degree mode, these will be called by eval when isRadianMode is false.
+        // They handle the conversion before calling the standard Math function.
+        const dsin = (x) => Math.sin(degToRad(x));
+        const dcos = (x) => Math.cos(degToRad(x));
+        const dtan = (x) => Math.tan(degToRad(x));
+        // --- End Helper functions ---
+
+
+        try {
+            // 1. Prepare the expression string
+            const safeExpression = prepareExpression(currentExpression);
+
+            // 2. Execute the calculation
+            // eslint-disable-next-line no-eval
+            let result = eval(safeExpression);
+
+            if (isNaN(result) || !isFinite(result)) {
+                mainDisplay.textContent = 'Error';
+            } else {
+                // Round to a reasonable number of decimal places for display
+                if (result % 1 !== 0) {
+                    result = parseFloat(result.toFixed(10));
+                }
+                
+                mainDisplay.textContent = result;
+                currentExpression = String(result); // Set for next operation
+                isResultDisplayed = true;
+            }
+
+        } catch (e) {
+            console.error('Calculation Error:', e);
+            mainDisplay.textContent = 'Error';
+            currentExpression = '';
+            isResultDisplayed = true;
+        }
+    }
+    
+    // Initial display update
+    window.onload = function() {
+        updateDisplay();
+        // Ensure the RAD button shows the initial mode and color
+        if (!isRadianMode) toggleRadDeg();
+    };
+
+</script>
+
+</body>
+</html>
+
